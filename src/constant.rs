@@ -31,6 +31,8 @@ pub const URL_ORDER_STATUS_CLOSED: &str = "/v1/orders/closed";
 pub const URL_ORDERBOOK: &str = "/v1/orderbook";
 /// URL of API getting ticker
 pub const URL_TICKER: &str = "/v1/ticker";
+/// URL of API getting tickers
+pub const URL_TICKERS: &str = "/v1/ticker/all";
 /// URL of API getting trandes ticks
 pub const URL_TRADES_TICKS: &str = "/v1/trades/ticks";
 /// URL of API getting market state

@@ -1,6 +1,6 @@
 use crate::response::ResponseError;
 
-use super::super::constant::{URL_SERVER, URL_TICKER};
+use super::super::constant::{URL_SERVER, URL_TICKER, URL_TICKERS};
 use super::SnapshotChangeType;
 
 use reqwest::header::ACCEPT;
@@ -123,6 +123,70 @@ impl TickerSnapshot {
             .map_err(crate::response::response_error_internal_url_parse_error)?;
         url.query_pairs_mut()
             .append_pair("markets", &markets_id.join(","));
+
+        reqwest::Client::new()
+            .get(url.as_str())
+            .header(ACCEPT, "application/json")
+            .send()
+            .await
+            .map_err(crate::response::response_error_from_reqwest)
+    }
+
+    pub async fn get_market_ticker_snapshot_list(quote_currencies: &[&str]) -> Result<Vec<Self>, ResponseError> {
+        let res = Self::market_request(quote_currencies).await?;
+        let res_serialized = res
+            .text()
+            .await
+            .map_err(crate::response::response_error_from_reqwest)?;
+
+        if res_serialized.contains("error") {
+            return Err(serde_json::from_str(&res_serialized)
+                .map(crate::response::response_error)
+                .ok()
+                .unwrap());
+        }
+
+        serde_json::from_str(&res_serialized)
+            .map(|i: Vec<TickerSnapshotSource>| {
+                i.into_iter().map(|x| {
+                    Self {
+                        market: x.market,
+                        trade_date: x.trade_date,
+                        trade_time: x.trade_time,
+                        trade_date_kst: x.trade_date_kst,
+                        trade_time_kst: x.trade_time_kst,
+                        trade_timestamp: x.trade_timestamp,
+                        opening_price: x.opening_price,
+                        high_price: x.high_price,
+                        low_price: x.low_price,
+                        trade_price: x.trade_price,
+                        prev_closing_price: x.prev_closing_price,
+                        change: x.change.as_str().into(),
+                        change_price: x.change_price,
+                        change_rate: x.change_rate,
+                        signed_change_price: x.signed_change_price,
+                        signed_change_rate: x.signed_change_rate,
+                        trade_volume: x.trade_volume,
+                        acc_trade_price: x.acc_trade_price,
+                        acc_trade_price_24h: x.acc_trade_price_24h,
+                        acc_trade_volume: x.acc_trade_volume,
+                        acc_trade_volume_24h: x.acc_trade_volume_24h,
+                        highest_52_week_price: x.highest_52_week_price,
+                        highest_52_week_date: x.highest_52_week_date,
+                        lowest_52_week_price: x.lowest_52_week_price,
+                        lowest_52_week_date: x.lowest_52_week_date,
+                        timestamp: x.timestamp,
+                    }
+                }).collect::<Vec<Self>>()
+            })
+            .map_err(crate::response::response_error_from_json)
+    }
+
+    async fn market_request(quote_currencies: &[&str]) -> Result<reqwest::Response, ResponseError> {
+        let mut url = Url::parse(&format!("{URL_SERVER}{URL_TICKERS}"))
+            .map_err(crate::response::response_error_internal_url_parse_error)?;
+        url.query_pairs_mut()
+            .append_pair("quote_currencies", &quote_currencies.join(","));
 
         reqwest::Client::new()
             .get(url.as_str())
