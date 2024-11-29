@@ -32,11 +32,19 @@ pub struct Caution {
 }
 
 #[derive(Deserialize)]
-pub struct MarketStateSource {
-    market: String,
-    korean_name: String,
-    english_name: String,
-    market_event: MarketEvent,
+#[serde(untagged)]
+pub enum MarketStateSource {
+    Detailed {
+        market: String,
+        korean_name: String,
+        english_name: String,
+        market_event: MarketEvent,
+    },
+    Simple {
+        market: String,
+        korean_name: String,
+        english_name: String,
+    }
 }
 
 impl MarketState {
@@ -57,11 +65,19 @@ impl MarketState {
         serde_json::from_str::<Vec<MarketStateSource>>(&res_serialized)
             .map(|x| {
                 x.into_iter()
-                    .map(|i| Self {
-                        market: i.market,
-                        korean_name: i.korean_name,
-                        english_name: i.english_name,
-                        market_event: Some(i.market_event),
+                    .map(|i| match i {
+                        MarketStateSource::Detailed { market, korean_name, english_name, market_event } => Self {
+                            market,
+                            korean_name,
+                            english_name,
+                            market_event: Some(market_event),
+                        },
+                        MarketStateSource::Simple { market, korean_name, english_name } => Self {
+                            market,
+                            korean_name,
+                            english_name,
+                            market_event: None,
+                        }
                     })
                     .collect()
             })
