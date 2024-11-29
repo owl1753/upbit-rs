@@ -309,6 +309,82 @@ pub async fn get_ticker_snapshot_list(markets_id: &[&str]) -> Result<Vec<TickerS
     TickerSnapshot::get_ticker_snapshot_list(markets_id).await
 }
 
+/// 요청 당시 마켓의 스냅샷을 반환한다. (Return the snapshot of the ticker at the moment of query.)
+///
+/// # Example
+/// ```rust
+/// let ticker_snapshot = api_quotation::get_ticker_snapshot(&["KRW-ETH"]).await;
+/// ```
+/// - parameters
+/// > `market_id` ex) KRW-ETH<br>
+/// # Response
+/// * 아래 응답의 `change`, `change_price`, `change_rate`, `signed_change_price`, `signed_change_rate` 필드들은 전일종가 대비 값입니다.
+/// * The fields `change`, `change_price`, `change_rate`, `signed_change_price`, and `signed_change_rate` in the response below are values compared to the previous day’s closing price.
+/// ```json
+/// [
+///   {
+///     "market": "KRW-BTC",
+///     "trade_date": "20180418",
+///     "trade_time": "102340",
+///     "trade_date_kst": "20180418",
+///     "trade_time_kst": "192340",
+///     "trade_timestamp": 1524047020000,
+///     "opening_price": 8450000,
+///     "high_price": 8679000,
+///     "low_price": 8445000,
+///     "trade_price": 8621000,
+///     "prev_closing_price": 8450000,
+///     "change": "RISE",
+///     "change_price": 171000,
+///     "change_rate": 0.0202366864,
+///     "signed_change_price": 171000,
+///     "signed_change_rate": 0.0202366864,
+///     "trade_volume": 0.02467802,
+///     "acc_trade_price": 108024804862.58253,
+///     "acc_trade_price_24h": 232702901371.09308,
+///     "acc_trade_volume": 12603.53386105,
+///     "acc_trade_volume_24h": 27181.31137002,
+///     "highest_52_week_price": 28885000,
+///     "highest_52_week_date": "2018-01-06",
+///     "lowest_52_week_price": 4175000,
+///     "lowest_52_week_date": "2017-09-25",
+///     "timestamp": 1524047026072
+///   }
+/// ]
+/// ```
+/// # Response Description
+/// | field             | description                   | type         |
+/// |:------------------|:------------------------------|:-------------|
+/// | market | 종목 구분 코드 | String |
+/// | trade_date | 최근 거래 일자(UTC) <br> 포맷: yyyyMMdd | String |
+/// | trade_time | 최근 거래 시각(UTC) <br> 포맷: HHmmss | String |
+/// | trade_date_kst | 최근 거래 일자(KST) <br> 포맷: yyyyMMdd | String |
+/// | trade_time_kst | 최근 거래 시각(KST) <br> 포맷: HHmmss | String |
+/// | trade_timestamp | 최근 거래 일시(UTC) <br> 포맷: Unix Timestamp | Long |
+/// | opening_price | 시가 | Double |
+/// | high_price | 고가 | Double |
+/// | low_price | 저가 | Double |
+/// | trade_price | 종가(현재가) | Double |
+/// | prev_closing_price | 전일 종가(UTC 0시 기준) | Double |
+/// | change | EVEN : 보합 <br> RISE : 상승 <br> FALL : 하락 | String |
+/// | change_price | 변화액의 절대값 | Double |
+/// | change_rate | 변화율의 절대값 | Double |
+/// | signed_change_price | 부호가 있는 변화액 | Double |
+/// | signed_change_rate | 부호가 있는 변화율 | Double |
+/// | trade_volume | 가장 최근 거래량 | Double |
+/// | acc_trade_price | 누적 거래대금(UTC 0시 기준) | Double |
+/// | acc_trade_price_24h | 24시간 누적 거래대금 | Double |
+/// | acc_trade_volume | 누적 거래량(UTC 0시 기준) | Double |
+/// | acc_trade_volume_24h | 24시간 누적 거래량 | Double |
+/// | highest_52_week_price | 52주 신고가 | Double |
+/// | highest_52_week_date | 52주 신고가 달성일 <br> 포맷: yyyy-MM-dd | String |
+/// | lowest_52_week_price | 52주 신저가 | Double |
+/// | lowest_52_week_date | 52주 신저가 달성일 <br> 포맷: yyyy-MM-dd | String |
+/// | timestamp | 타임스탬프 | Long |
+pub async fn get_market_ticker_snapshot_list(quote_currencies: &[&str]) -> Result<Vec<TickerSnapshot>, ResponseError> {
+    TickerSnapshot::get_market_ticker_snapshot_list(quote_currencies).await
+}
+
 /// 호가 정보를 조회한다. (Inquiry bid price and offered price.)
 ///
 /// # Example
