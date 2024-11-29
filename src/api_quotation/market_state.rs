@@ -10,26 +10,25 @@ pub struct MarketState {
     pub market: String,
     pub korean_name: String,
     pub english_name: String,
-    pub market_warning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub market_event: Option<MarketEvent>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-#[serde(untagged)]
-pub enum MarketEvent {
-    Warning(bool),
-    Caution { caution: Caution, warning: bool },
+pub struct MarketEvent {
+    pub warning: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub caution: Option<Caution>,
 }
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Caution {
-    CONCENTRATION_OF_SMALL_ACCOUNTS: bool,
-    DEPOSIT_AMOUNT_SOARING: bool,
-    GLOBAL_PRICE_DIFFERENCES: bool,
-    PRICE_FLUCTUATIONS: bool,
-    TRADING_VOLUME_SOARING: bool,
+    pub PRICE_FLUCTUATIONS: bool,
+    pub TRADING_VOLUME_SOARING: bool,
+    pub DEPOSIT_AMOUNT_SOARING: bool,
+    pub GLOBAL_PRICE_DIFFERENCES: bool,
+    pub CONCENTRATION_OF_SMALL_ACCOUNTS: bool,
 }
 
 #[derive(Deserialize)]
@@ -37,7 +36,6 @@ pub struct MarketStateSource {
     market: String,
     korean_name: String,
     english_name: String,
-    market_warning: String,
     market_event: MarketEvent,
 }
 
@@ -63,7 +61,6 @@ impl MarketState {
                         market: i.market,
                         korean_name: i.korean_name,
                         english_name: i.english_name,
-                        market_warning: Some(i.market_warning),
                         market_event: Some(i.market_event),
                     })
                     .collect()
